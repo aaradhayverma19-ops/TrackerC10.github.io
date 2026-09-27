@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syllabus Tracker - Complete Class 10</title>
+    <!-- Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .transition-all {
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-5xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md flex items-center justify-center">
+                    <i class="fa-solid fa-graduation-cap text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900">Syllabus Tracker</h1>
+                    <p class="text-xs text-slate-500">Track your Class 10 Board Exam Preparation</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="openExportModal()" class="px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-sm transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-download"></i> Backup
+                </button>
+                <label class="px-3.5 py-2 text-xs font-medium text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 shadow-sm transition-all flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-upload"></i> Restore
+                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+                </label>
+                <button onclick="resetData()" class="px-3 py-2 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-lg hover:bg-red-100 transition-all">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl w-full mx-auto px-4 py-8 flex-grow">
+        
+        <!-- Stats & Progress Dashboard -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Overall Progress</h2>
+                    <p class="text-xs text-slate-500" id="progressSubtitle">0 of 0 chapters completed</p>
+                </div>
+                <div class="text-right">
+                    <span id="progressPercentage" class="text-2xl font-black text-indigo-600">0%</span>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="w-full bg-slate-100 rounded-full h-3 mb-6 overflow-hidden flex shadow-inner">
+                <div id="barDone" class="bg-emerald-500 h-full transition-all duration-500" style="width: 0%"></div>
+                <div id="barHalf" class="bg-amber-400 h-full transition-all duration-500" style="width: 0%"></div>
+                <div id="barNot" class="bg-rose-500 h-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <!-- Statistic Badges Grid -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-center">
+                    <span class="block text-xs font-semibold text-emerald-700 uppercase tracking-wider mb-1">Done (🟢)</span>
+                    <span id="statDoneCount" class="text-xl font-bold text-emerald-800">0</span>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-3 text-center">
+                    <span class="block text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">Half Done (🟡)</span>
+                    <span id="statHalfCount" class="text-xl font-bold text-amber-800">0</span>
+                </div>
+                <div class="bg-rose-50 border border-rose-100 rounded-xl p-3 text-center">
+                    <span class="block text-xs font-semibold text-rose-700 uppercase tracking-wider mb-1">Not Done (🔴)</span>
+                    <span id="statNotCount" class="text-xl font-bold text-rose-800">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Custom Chapter Form -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-8">
+            <h2 class="text-md font-bold text-slate-900 mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-circle-plus text-indigo-600"></i> Add Custom Chapter
+            </h2>
+            <form id="chapterForm" onsubmit="addChapter(event)" class="flex flex-col sm:flex-row gap-3">
+                <div class="sm:w-1/3">
+                    <select id="subjectInput" class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="Hindi - Sparsh & Sanchyan">Hindi (Sparsh & Sanchyan)</option>
+                        <option value="History">History</option>
+                        <option value="Geography">Geography</option>
+                        <option value="Political Science">Political Science</option>
+                        <option value="Economics">Economics</option>
+                    </select>
+                </div>
+                <div class="flex-grow">
+                    <input type="text" id="chapterInput" placeholder="Enter chapter name..." required
+                        class="w-full px-4 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                </div>
+                <div class="sm:w-40">
+                    <select id="statusInput" class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all">
+                        <option value="not">🔴 Not Done</option>
+                        <option value="half">🟡 Half Done</option>
+                        <option value="done">🟢 Done</option>
+                    </select>
+                </div>
+                <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i> Add
+                </button>
+            </form>
+        </div>
+
+        <!-- Filter & Search Controls -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <!-- Status Filter Tabs -->
+                <div class="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-xl text-xs font-medium w-full sm:w-auto">
+                    <button onclick="setFilter('all')" id="filter-all" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all font-semibold">All</button>
+                    <button onclick="setFilter('done')" id="filter-done" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 transition-all">Done (🟢)</button>
+                    <button onclick="setFilter('half')" id="filter-half" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 transition-all">Half (🟡)</button>
+                    <button onclick="setFilter('not')" id="filter-not" class="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 transition-all">Not Done (🔴)</button>
+                </div>
+                <!-- Subject Filter Dropdown -->
+                <div class="w-full sm:w-64">
+                    <select id="subjectFilter" onchange="setSubjectFilter(this.value)" class="w-full px-3 py-2 text-xs font-medium bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="all">📚 All Subjects</option>
+                        <option value="Mathematics">Mathematics</option>
+                        <option value="Science">Science</option>
+                        <option value="Hindi - Sparsh & Sanchyan">Hindi (Sparsh & Sanchyan)</option>
+                        <option value="History">History</option>
+                        <option value="Geography">Geography</option>
+                        <option value="Political Science">Political Science</option>
+                        <option value="Economics">Economics</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects Container -->
+        <div id="subjectsContainer" class="space-y-6">
+            <!-- Rendered via JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12 bg-white rounded-2xl border border-slate-200">
+            <div class="text-slate-300 text-4xl mb-3">
+                <i class="fa-regular fa-folder-open"></i>
+            </div>
+            <p class="text-sm font-medium text-slate-600">No chapters match your filter</p>
+            <p class="text-xs text-slate-400 mt-1">Try switching tabs or resetting filters.</p>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8 text-center text-xs text-slate-500">
+        <p>Syllabus Tracker &bull; Automatically saved to your browser's local storage.</p>
+    </footer>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs px-4 py-3 rounded-xl shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-2">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+        <span id="toastMessage">Action completed successfully</span>
+    </div>
+
+    <script>
+        // Default pre-loaded syllabus structure provided by user
+        const defaultSyllabus = [
+            // Mathematics
+            { id: 'm1', subject: 'Mathematics', name: 'Real Numbers', status: 'not' },
+            { id: 'm2', subject: 'Mathematics', name: 'Polynomials', status: 'not' },
+            { id: 'm3', subject: 'Mathematics', name: 'Pair of Linear Equations in Two Variables', status: 'not' },
+            { id: 'm4', subject: 'Mathematics', name: 'Quadratic Equations', status: 'not' },
+            { id: 'm5', subject: 'Mathematics', name: 'Arithmetic Progressions', status: 'not' },
+            { id: 'm6', subject: 'Mathematics', name: 'Triangles', status: 'not' },
+            { id: 'm7', subject: 'Mathematics', name: 'Coordinate Geometry', status: 'not' },
+            { id: 'm8', subject: 'Mathematics', name: 'Introduction to Trigonometry', status: 'not' },
+            { id: 'm9', subject: 'Mathematics', name: 'Some Applications of Trigonometry', status: 'not' },
+            { id: 'm10', subject: 'Mathematics', name: 'Circles', status: 'not' },
+            { id: 'm11', subject: 'Mathematics', name: 'Areas Related to Circles', status: 'not' },
+            { id: 'm12', subject: 'Mathematics', name: 'Surface Areas and Volumes', status: 'not' },
+            { id: 'm13', subject: 'Mathematics', name: 'Statistics', status: 'not' },
+            { id: 'm14', subject: 'Mathematics', name: 'Probability', status: 'not' },
+
+            // Science
+            { id: 's1', subject: 'Science', name: 'Chemical Reactions and Equations', status: 'not' },
+            { id: 's2', subject: 'Science', name: 'Acids, Bases and Salts', status: 'not' },
+            { id: 's3', subject: 'Science', name: 'Metals and Non-Metals', status: 'not' },
+            { id: 's4', subject: 'Science', name: 'Carbon and Its Compounds', status: 'not' },
+            { id: 's5', subject: 'Science', name: 'Life Processes', status: 'not' },
+            { id: 's6', subject: 'Science', name: 'Control and Coordination', status: 'not' },
+            { id: 's7', subject: 'Science', name: 'How Do Organisms Reproduce?', status: 'not' },
+            { id: 's8', subject: 'Science', name: 'Heredity and Evolution', status: 'not' },
+            { id: 's9', subject: 'Science', name: 'Light – Reflection and Refraction', status: 'not' },
+            { id: 's10', subject: 'Science', name: 'The Human Eye and the Colourful World', status: 'not' },
+            { id: 's11', subject: 'Science', name: 'Electricity', status: 'not' },
+            { id: 's12', subject: 'Science', name: 'Magnetic Effects of Electric Current', status: 'not' },
+            { id: 's13', subject: 'Science', name: 'Our Environment', status: 'not' },
+
+            // Hindi (Sparsh & Sanchyan)
+            { id: 'h1', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Bade Bhai Saheb (Premchand)', status: 'not' },
+            { id: 'h2', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Diary Ka Ek Panna (Sitaram Seksaria)', status: 'not' },
+            { id: 'h3', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Tatara-Vamiro Katha (Liladhar Mandloi)', status: 'not' },
+            { id: 'h4', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Teesri Kasam ke Shilpkar Shailendra (Prahlad Agarwal)', status: 'not' },
+            { id: 'h5', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Ab Kahan Dusron ke Dukh se Dukhi Hone Wale (Nida Fazli)', status: 'not' },
+            { id: 'h6', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Patjhar mein Tooti Pattiyan (Ravindra Kelekar)', status: 'not' },
+            { id: 'h7', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh - Kartoos (Habib Tanvir)', status: 'not' },
+            { id: 'h8', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Sakhi (Kabir)', status: 'not' },
+            { id: 'h9', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Pad (Meera)', status: 'not' },
+            { id: 'h10', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Manushyata (Maithili Sharan Gupt)', status: 'not' },
+            { id: 'h11', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Parvat Pradesh mein Pavas (Sumitranandan Pant)', status: 'not' },
+            { id: 'h12', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Top (Virendra Dangwal)', status: 'not' },
+            { id: 'h13', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Kar Chale Hum Fida (Kaifi Azmi)', status: 'not' },
+            { id: 'h14', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sparsh (Poetry) - Aatmatraan (Rabindranath Tagore)', status: 'not' },
+            { id: 'h15', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sanchyan - Harihar Kaka (Mitithleshwar)', status: 'not' },
+            { id: 'h16', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sanchyan - Sapnon ke-se Din (Gurdayal Singh)', status: 'not' },
+            { id: 'h17', subject: 'Hindi - Sparsh & Sanchyan', name: 'Sanchyan - Topi Shukla (Rahi Masoom Raza)', status: 'not' },
+
+            // History
+            { id: 'hist1', subject: 'History', name: 'Chapter 1: The Rise of Nationalism in Europe', status: 'not' },
+            { id: 'hist2', subject: 'History', name: 'Chapter 2: Nationalism in India', status: 'not' },
+            { id: 'hist3', subject: 'History', name: 'Chapter 3: The Making of a Global World', status: 'not' },
+            { id: 'hist4', subject: 'History', name: 'Chapter 4: The Age of Industrialisation', status: 'not' },
+            { id: 'hist5', subject: 'History', name: 'Chapter 5: Print Culture and the Modern World', status: 'not' },
+
+            // Geography
+            { id: 'geo1', subject: 'Geography', name: 'Chapter 1: Resources and Development', status: 'not' },
+            { id: 'geo2', subject: 'Geography', name: 'Chapter 2: Forest and Wildlife Resources', status: 'not' },
+            { id: 'geo3', subject: 'Geography', name: 'Chapter 3: Water Resources', status: 'not' },
+            { id: 'geo4', subject: 'Geography', name: 'Chapter 4: Agriculture', status: 'not' },
+            { id: 'geo5', subject: 'Geography', name: 'Chapter 5: Minerals and Energy Resources', status: 'not' },
+            { id: 'geo6', subject: 'Geography', name: 'Chapter 6: Manufacturing Industries', status: 'not' },
+            { id: 'geo7', subject: 'Geography', name: 'Chapter 7: Lifelines of National Economy', status: 'not' },
+
+            // Political Science
+            { id: 'pol1', subject: 'Political Science', name: 'Chapter 1: Power Sharing', status: 'not' },
+            { id: 'pol2', subject: 'Political Science', name: 'Chapter 2: Federalism', status: 'not' },
+            { id: 'pol3', subject: 'Political Science', name: 'Chapter 3: Gender, Religion and Caste', status: 'not' },
+            { id: 'pol4', subject: 'Political Science', name: 'Chapter 4: Political Parties', status: 'not' },
+            { id: 'pol5', subject: 'Political Science', name: 'Chapter 5: Outcomes of Democracy', status: 'not' },
+
+            // Economics
+            { id: 'eco1', subject: 'Economics', name: 'Chapter 1: Development', status: 'not' },
+            { id: 'eco2', subject: 'Economics', name: 'Chapter 2: Sectors of the Indian Economy', status: 'not' },
+            { id: 'eco3', subject: 'Economics', name: 'Chapter 3: Money and Credit', status: 'not' },
+            { id: 'eco4', subject: 'Economics', name: 'Chapter 4: Globalisation and the Indian Economy', status: 'not' },
+            { id: 'eco5', subject: 'Economics', name: 'Chapter 5: Consumer Rights', status: 'not' }
+        ];
+
+        let chapters = JSON.parse(localStorage.getItem('syllabus_class10_chapters')) || defaultSyllabus;
+        let currentFilter = 'all';
+        let currentSubjectFilter = 'all';
+
+        function saveAndRender() {
+            localStorage.setItem('syllabus_class10_chapters', JSON.stringify(chapters));
+            renderDashboard();
+            renderChapters();
+        }
+
+        function addChapter(e) {
+            e.preventDefault();
+            const subject = document.getElementById('subjectInput').value;
+            const input = document.getElementById('chapterInput');
+            const status = document.getElementById('statusInput').value;
+            const name = input.value.trim();
+
+            if (!name) return;
+
+            const newChapter = {
+                id: 'custom_' + Date.now(),
+                subject: subject,
+                name: name,
+                status: status
+            };
+
+            chapters.push(newChapter);
+            input.value = '';
+            showToast('Chapter added successfully!', 'success');
+            saveAndRender();
+        }
+
+        function updateStatus(id, newStatus) {
+            const chapter = chapters.find(c => c.id === id);
+            if (chapter) {
+                chapter.status = newStatus;
+                saveAndRender();
+            }
+        }
+
+        function deleteChapter(id) {
+            chapters = chapters.filter(c => c.id !== id);
+            showToast('Chapter removed', 'info');
+            saveAndRender();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            ['all', 'done', 'half', 'not'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (f === filter) {
+                    btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg bg-white text-slate-800 shadow-sm transition-all font-semibold';
+                } else {
+                    btn.className = 'flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-slate-600 hover:text-slate-800 transition-all';
+                }
+            });
+            renderChapters();
+        }
+
+        function setSubjectFilter(subject) {
+            currentSubjectFilter = subject;
+            renderChapters();
+        }
+
+        function renderDashboard() {
+            const total = chapters.length;
+            const done = chapters.filter(c => c.status === 'done').length;
+            const half = chapters.filter(c => c.status === 'half').length;
+            const not = chapters.filter(c => c.status === 'not').length;
+
+            document.getElementById('statDoneCount').textContent = done;
+            document.getElementById('statHalfCount').textContent = half;
+            document.getElementById('statNotCount').textContent = not;
+            document.getElementById('progressSubtitle').textContent = `${done} of ${total} chapters completed`;
+
+            const percentage = total > 0 ? Math.round((done / total) * 100) : 0;
+            document.getElementById('progressPercentage').textContent = `${percentage}%`;
+
+            const donePercent = total > 0 ? (done / total) * 100 : 0;
+            const halfPercent = total > 0 ? (half / total) * 100 : 0;
+            const notPercent = total > 0 ? (not / total) * 100 : 0;
+
+            document.getElementById('barDone').style.width = `${donePercent}%`;
+            document.getElementById('barHalf').style.width = `${halfPercent}%`;
+            document.getElementById('barNot').style.width = `${notPercent}%`;
+        }
+
+        function renderChapters() {
+            const container = document.getElementById('subjectsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            // Group by subjects
+            const subjectsList = [
+                'Mathematics', 
+                'Science', 
+                'Hindi - Sparsh & Sanchyan', 
+                'History', 
+                'Geography', 
+                'Political Science', 
+                'Economics'
+            ];
+
+            let htmlContent = '';
+            let totalVisible = 0;
+
+            subjectsList.forEach(subj => {
+                if (currentSubjectFilter !== 'all' && currentSubjectFilter !== subj) return;
+
+                const subjectChapters = chapters.filter(c => {
+                    if (c.subject !== subj) return false;
+                    if (currentFilter === 'all') return true;
+                    return c.status === currentFilter;
+                });
+
+                if (subjectChapters.length === 0) return;
+                totalVisible += subjectChapters.length;
+
+                // Subject completion calculation
+                const allSubjChapters = chapters.filter(c => c.subject === subj);
+                const subjDone = allSubjChapters.filter(c => c.status === 'done').length;
+                const subjTotal = allSubjChapters.length;
+                const subjPercent = subjTotal > 0 ? Math.round((subjDone / subjTotal) * 100) : 0;
+
+                htmlContent += `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 overflow-hidden">
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-book-open text-indigo-600"></i> ${subj}
+                                </h3>
+                                <p class="text-xs text-slate-500">${subjDone} of ${subjTotal} chapters done</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-bold px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg">${subjPercent}% Complete</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2.5">
+                            ${subjectChapters.map(c => {
+                                let badgeClass = '';
+                                let borderClass = '';
+                                if (c.status === 'done') {
+                                    badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+                                    borderClass = 'border-l-4 border-l-emerald-500';
+                                } else if (c.status === 'half') {
+                                    badgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
+                                    borderClass = 'border-l-4 border-l-amber-400';
+                                } else {
+                                    badgeClass = 'bg-rose-100 text-rose-800 border-rose-200';
+                                    borderClass = 'border-l-4 border-l-rose-500';
+                                }
+
+                                return `
+                                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-slate-50/70 border border-slate-200/80 rounded-xl gap-2 ${borderClass} transition-all hover:bg-white hover:shadow-sm">
+                                        <span class="font-medium text-xs sm:text-sm text-slate-800">${escapeHtml(c.name)}</span>
+                                        <div class="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+                                            <select onchange="updateStatus('${c.id}', this.value)" class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer ${badgeClass}">
+                                                <option value="done" ${c.status === 'done' ? 'selected' : ''}>🟢 Done</option>
+                                                <option value="half" ${c.status === 'half' ? 'selected' : ''}>🟡 Half Done</option>
+                                                <option value="not" ${c.status === 'not' ? 'selected' : ''}>🔴 Not Done</option>
+                                            </select>
+                                            ${c.id.startsWith('custom_') ? `
+                                            <button onclick="deleteChapter('${c.id}')" title="Delete Chapter" class="text-slate-400 hover:text-red-600 p-1.5 transition-all">
+                                                <i class="fa-solid fa-trash-can text-xs"></i>
+                                            </button>` : ''}
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = htmlContent;
+
+            if (totalVisible === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        function resetData() {
+            if (confirm('Are you sure you want to reset all progress back to default?')) {
+                chapters = JSON.parse(JSON.stringify(defaultSyllabus));
+                showToast('Progress reset successfully', 'info');
+                saveAndRender();
+            }
+        }
+
+        function openExportModal() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chapters, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `syllabus_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast('Backup downloaded successfully!', 'success');
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (Array.isArray(parsed)) {
+                        chapters = parsed;
+                        saveAndRender();
+                        showToast('Progress restored successfully!', 'success');
+                    } else {
+                        showToast('Invalid backup file format', 'error');
+                    }
+                } catch (err) {
+                    showToast('Error reading backup file', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMessage.textContent = message;
+            if (type === 'success') {
+                toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+            } else if (type === 'info') {
+                toastIcon.className = 'fa-solid fa-circle-info text-sky-400';
+            } else {
+                toastIcon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        window.onload = function() {
+            renderDashboard();
+            renderChapters();
+        };
+    </script>
+</body>
+</html>
